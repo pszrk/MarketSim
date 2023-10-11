@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketSim</title>
+</head>
+<body>
+    <h1>Order Book</h1>
+    <div id="order-book"></div>
+
+    <script>
+        const orderBookDiv = document.getElementById('order-book');
+
+        const socket = new WebSocket('ws://localhost:5000');
+
+        socket.onopen = function(event) {
+            console.log('WebSocket connection opened:', event);
+        };
+
+        socket.onmessage = function(event) {
+            const orderBookData = JSON.parse(event.data);
+            console.log('Received Order Book Update:', orderBookData);
+
+            // Display order book data on the webpage
+            orderBookDiv.innerText = JSON.stringify(orderBookData, null, 2);
+        };
+
+        socket.onclose = function(event) {
+            console.log('WebSocket connection closed:', event);
+        };
+    </script>
+</body>
+</html>
