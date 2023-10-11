@@ -20,8 +20,9 @@ class WebSocketServer:
             self.websockets.remove(websocket)
 
 
-    def send_order_book_update(self, data):
+    async def send_order_book_update(self, data):
         message = json.dumps(data)
+        print(f"Sending message to client: {message}")
         # Use asyncio.gather to send the message to all connected clients concurrently
         asyncio.gather(*(websocket.send(message) for websocket in self.websockets))
 
@@ -48,7 +49,7 @@ class WebSocketServer:
         else: print("no server found")
 
 async def run_simulation(server, delay):
-    for _ in range(10):
+    for _ in range(100):
         simulate_random_order(server.order_book, 1)
         order_book_status = server.order_book.get_status()
         print(f"status is {order_book_status}")
@@ -62,8 +63,8 @@ async def main():
     server_task = asyncio.create_task(srv.start_server())
     simulation_task = asyncio.create_task(run_simulation(srv, 1))
     
-    #await simulation_task
-    #await srv.stop_server()
+    await simulation_task
+    await srv.stop_server()
 
     # Use gather to await both tasks
     await asyncio.gather(server_task, simulation_task)

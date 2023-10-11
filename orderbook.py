@@ -10,7 +10,6 @@ class Order:
         return f"[{self.side};{self.price};{self.quantity}]."
     
     def to_dict(self):
-        # Convert the Order object to a dictionary
         return {
             'side': self.side,
             'price': self.price,
@@ -20,19 +19,22 @@ class Order:
 
 class OrderBook:
     def __init__(self):
-        self.bids = {}  # dictionary with key: price, value: [list of orders]
+        self.bids = {}  # dictionary with key: price, value: [list of Order objects]
         self.asks = {}
         self.price = 0
 
-    def to_json_format(self):
-        bids_data = [[price, sum(order.quantity for order in orders)] for price, orders in self.bids.items()]
-        asks_data = [[price, sum(order.quantity for order in orders)] for price, orders in self.asks.items()]
+    def to_json(self):
+        bids_data = {price: [order.to_dict() for order in orders] for price, orders in self.bids.items()}
+        asks_data = {price: [order.to_dict() for order in orders] for price, orders in self.asks.items()}
 
         return {
             'price': self.price,
             'bids': bids_data,
             'asks': asks_data
         }
+    
+    def get_status(self):
+        return self.to_json()
     
     def add_order(self, order):
         if order.side == 'buy':
@@ -45,9 +47,9 @@ class OrderBook:
                 self.asks[order.price].append(order)
             else:
                 self.asks[order.price] = [order]
-        self.match_orders(order)
+        self.match_orders()
     
-    def match_orders(self, newest_order):
+    def match_orders(self):
         for buy_price in sorted(self.bids.keys(), reverse=True):
             for sell_price in sorted(self.asks.keys()):
                 if buy_price >= sell_price:
@@ -60,6 +62,7 @@ class OrderBook:
                     self.price = sell_price
                     self.execute_orders(self.bids[buy_price], matched_quantity)
                     self.execute_orders(self.asks[sell_price], matched_quantity)
+                    print(self.get_status()) # this doesnt work 
                     if not self.bids[buy_price]:
                         print (f"removing bids key at {buy_price}")
                         del self.bids[buy_price]
@@ -92,9 +95,7 @@ class OrderBook:
         return self
 
 
-    def get_status(self):
-        order_book_json = json.dumps(order_book.to_json_format(), indent=2)
-        return order_book_json
+    
     
 
 def print_book(book):

@@ -7,10 +7,12 @@
 </head>
 <body>
     <h1>Order Book</h1>
-    <div id="order-book"></div>
+    <div id="order-book-container">
+        <div id="price"></div>
+    </div>
 
     <script>
-        const orderBookDiv = document.getElementById('order-book');
+        const priceDiv = document.getElementById('price');
 
         const socket = new WebSocket('ws://localhost:5000');
 
@@ -19,11 +21,22 @@
         };
 
         socket.onmessage = function(event) {
-            const orderBookData = JSON.parse(event.data);
-            console.log('Received Order Book Update:', orderBookData);
+            try{
+                const orderBookData = JSON.parse(event.data);
+                console.log(typeof orderBookData);
+                console.log(orderBookData);
+                console.log('price should be:', orderBookData.price);
+                console.log('bids should be:', orderBookData.bids);
+                console.log('asks should be:', orderBookData.asks);
+                // display order book data
+                priceDiv.innerText = orderBookData.price;
+                console.log(`price amount is ${orderBookData.price}`)
+            }
+            catch(error){
+                console.error('Error parsing JSON:', error);
+            }
 
-            // Display order book data on the webpage
-            orderBookDiv.innerText = JSON.stringify(orderBookData, null, 2);
+            
         };
 
         socket.onclose = function(event) {
