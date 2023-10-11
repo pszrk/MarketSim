@@ -57,15 +57,20 @@ class OrderBook:
                         sum(o.quantity for o in self.asks[sell_price])
                     )
                     print(f" matched {matched_quantity}")
-                    self.price == sell_price
+                    self.price = sell_price
                     self.execute_orders(self.bids[buy_price], matched_quantity)
                     self.execute_orders(self.asks[sell_price], matched_quantity)
                     if not self.bids[buy_price]:
                         print (f"removing bids key at {buy_price}")
                         del self.bids[buy_price]
+                        if not self.asks[sell_price]:
+                            print (f"also removing asks key at {sell_price}")
+                            del self.asks[sell_price]
+                        break
                     if not self.asks[sell_price]:
                         print (f"removing asks key at {sell_price}")
                         del self.asks[sell_price]
+                        break
     
     def execute_orders(self, orders, quantity):
         remaining_quantity = quantity
