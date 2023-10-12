@@ -3,16 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
     <title>MarketSim</title>
 </head>
 <body>
     <h1>Order Book</h1>
     <div id="order-book-container">
         <div id="price"></div>
+        <div id="last"></div>
+        <div id="labels">BID&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspASK</div>
+        <div id="asks-grid-container">
+            <div id="asks-data"></div>
+        </div>
+        <div id="bids-grid-container">
+            <div id="bids-data"></div>
+        </div>        
     </div>
 
     <script>
         const priceDiv = document.getElementById('price');
+        const lastOrderDiv = document.getElementById('last');
+        const bidsDiv = document.getElementById('bids-data');
+        const asksDiv = document.getElementById('asks-data');
 
         const socket = new WebSocket('ws://localhost:5000');
 
@@ -28,9 +41,52 @@
                 console.log('price should be:', orderBookData.price);
                 console.log('bids should be:', orderBookData.bids);
                 console.log('asks should be:', orderBookData.asks);
+                console.log('last should be:', orderBookData.last_order);
                 // display order book data
                 priceDiv.innerText = orderBookData.price;
+                lastOrderDiv.innerText = 
+                    `newest order: 
+                    ${orderBookData.last_order.side}  ${orderBookData.last_order.price}    ${orderBookData.last_order.quantity}`
+
+                bidsStr = '';
+                bids = [];                
+                for(const key in orderBookData.bids){
+                    if(orderBookData.bids.hasOwnProperty(key)){
+                        const nestedObj = orderBookData.bids[key];
+                        const order = {
+                            price: nestedObj[0].price,
+                            qty: nestedObj[0].quantity,
+                        };
+                        //console.log("ORDER IS ", order);
+                        bids.push(order);     
+                    }
+                }
+                bids.sort((a,b) => b.price - a.price);  
+                for(bid of bids){
+                    bidsStr += `${bid.qty}.............${bid.price} \n` 
+                }               
+                bidsDiv.innerText = bidsStr;
+
+                asksStr = '';
+                asks = [];                
+                for(const key in orderBookData.asks){
+                    if(orderBookData.asks.hasOwnProperty(key)){
+                        const nestedObj = orderBookData.asks[key];
+                        const order = {
+                            price: nestedObj[0].price,
+                            qty: nestedObj[0].quantity,
+                        };
+                        asks.push(order);     
+                    }
+                }
+                asks.sort((a,b) => b.price - a.price);   
+                for(ask of asks){
+                    asksStr += `${ask.price}.............${ask.qty}\n` 
+                }               
+                asksDiv.innerText = asksStr;
+
                 console.log(`price amount is ${orderBookData.price}`)
+                
             }
             catch(error){
                 console.error('Error parsing JSON:', error);

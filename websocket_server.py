@@ -26,13 +26,7 @@ class WebSocketServer:
         # Use asyncio.gather to send the message to all connected clients concurrently
         asyncio.gather(*(websocket.send(message) for websocket in self.websockets))
 
-
-    def broadcast_order_book_status(self):
-        # Call get_status method of the OrderBook and broadcast the JSON data
-        order_book_status = self.order_book.get_status()
-        self.send_order_book_update(order_book_status)
-
-
+    
     async def start_server(self):
         self.server = await websockets.serve(
             self.order_book_server,
@@ -53,15 +47,15 @@ async def run_simulation(server, delay):
         simulate_random_order(server.order_book, 1)
         order_book_status = server.order_book.get_status()
         print(f"status is {order_book_status}")
-        await(asyncio.sleep(delay))
         await server.send_order_book_update(order_book_status)
+        await(asyncio.sleep(delay))        
 
 
 async def main():
     orderbook = OrderBook()
     srv = WebSocketServer(orderbook)
     server_task = asyncio.create_task(srv.start_server())
-    simulation_task = asyncio.create_task(run_simulation(srv, 1))
+    simulation_task = asyncio.create_task(run_simulation(srv, 8))
     
     await simulation_task
     await srv.stop_server()

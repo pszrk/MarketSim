@@ -22,21 +22,26 @@ class OrderBook:
         self.bids = {}  # dictionary with key: price, value: [list of Order objects]
         self.asks = {}
         self.price = 0
+        self.last_order = None
 
     def to_json(self):
         bids_data = {price: [order.to_dict() for order in orders] for price, orders in self.bids.items()}
         asks_data = {price: [order.to_dict() for order in orders] for price, orders in self.asks.items()}
+        last_order = self.last_order.to_dict()
 
         return {
             'price': self.price,
             'bids': bids_data,
-            'asks': asks_data
+            'asks': asks_data,
+            'last_order' : last_order
         }
     
     def get_status(self):
+        # add most recent order
         return self.to_json()
     
     def add_order(self, order):
+        self.last_order = order
         if order.side == 'buy':
             if order.price in self.bids:
                 self.bids[order.price].append(order)

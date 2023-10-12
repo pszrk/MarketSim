@@ -1,0 +1,21 @@
+body{
+    background-color: black ;
+    color: azure;
+    font-family: sans-serif;
+}
+
+#price{
+    padding-bottom: 30px;
+}
+
+#last{
+    padding-bottom: 20px;
+}
+
+#labels{
+    padding-bottom: 10px;
+}
+
+#asks-grid-container{
+    padding-left: 75px;
+}
