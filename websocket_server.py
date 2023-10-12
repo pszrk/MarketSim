@@ -22,7 +22,7 @@ class WebSocketServer:
 
     async def send_order_book_update(self, data):
         message = json.dumps(data)
-        print(f"Sending message to client: {message}")
+        #print(f"Sending message to client: {message}")
         # Use asyncio.gather to send the message to all connected clients concurrently
         asyncio.gather(*(websocket.send(message) for websocket in self.websockets))
 
@@ -46,7 +46,7 @@ async def run_simulation(server, delay):
     for _ in range(100):
         simulate_random_order(server.order_book, 1)
         order_book_status = server.order_book.get_status()
-        print(f"status is {order_book_status}")
+        #print(f"status is {order_book_status}")
         await server.send_order_book_update(order_book_status)
         await(asyncio.sleep(delay))        
 
