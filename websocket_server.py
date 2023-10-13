@@ -29,7 +29,10 @@ class WebSocketServer:
     async def disconnect_all(self):
         # disconnect all connected websockets
         for websocket in self.websockets:
-            await websocket.close()
+            try:
+                await websocket.close()
+            except Exception as e:
+                print(f"Error closing websocket: {e}")
         self.websockets.clear()
 
 
@@ -47,22 +50,28 @@ class WebSocketServer:
             5000
         )
         print("server running")
-        # await self.server.wait_closed() # this line ensures this method does not exit until server is closed
 
 
-    async def stop_server(self):
+    async def stop_server(self):        
         if self.server:
             print("trying to close server")
-            await self.disconnect_all()
-            self.server.close()
-            await self.server.wait_closed()
-            print("all websockets disconnected and server closed")
+            try:
+                await self.disconnect_all()
+                print("websockets disconnected")
+                if(self.server):
+                    self.server.close()
+                    await self.server.wait_closed()
+                else:
+                    print("not self server")
+                print("all websockets disconnected and server closed")
+            except Exception as e:
+                print(f"an error occured during server close: {e}")
         else: print("no server found")
 
 
 
 async def run_server_simulation(server, delay):
-    for _ in range(100):
+    for _ in range(3):
         simulate_random_order(server.order_book)
         order_book_status = server.order_book.get_status()
         await server.send_order_book_update(order_book_status)

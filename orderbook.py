@@ -30,7 +30,6 @@ class OrderBook:
         bids_data = {price: [order.to_dict() for order in orders] for price, orders in self.bids.items()}
         asks_data = {price: [order.to_dict() for order in orders] for price, orders in self.asks.items()}
         last_order = self.last_order
-
         return {
             'price': self.price,
             'bids': bids_data,
@@ -52,7 +51,6 @@ class OrderBook:
             if order.price not in self.asks:
                 self.asks[order.price] = deque()
             self.asks[order.price].append(order)
-        self.calculate_bid_ask()
 
 
     def calculate_bid_ask(self):
@@ -115,8 +113,7 @@ class OrderBook:
             else: #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
                 self.add_order_to_book(buyorder)
                 print(f"adding buy order to book, no asks sufficient to fill it.")
-                buyorder.quantity = 0 # this is needed to avoid duplicate posting the same order to book
-                break
+                return # return here to avoid double posting the order to the book
         if(buyorder.quantity > 0): #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
                 self.add_order_to_book(buyorder)
                 print(f"adding buy order to book, no asks sufficient to fill it.")
@@ -152,11 +149,13 @@ class OrderBook:
                     if front_buy_order_at_price.quantity > 0: #this particular buy order still has contracts remaining unfilled, so add it back to the front of the deque of buy orders at its price
                         buy_orders_at_price.appendleft(front_buy_order_at_price)
                         print(f"appending remaing buy order back to the orders at this price.")
+                    elif not self.bids[self.price]:
+                        del self.bids[self.price]
+                        print(f"buy order fully filled and no remaining bids at {self.price}, removing price from dict")
             else: #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
                 self.add_order_to_book(sellorder)
                 print(f"adding sell order to book, no asks sufficient to fill it.")
-                sellorder.quantity = 0 # this is needed to avoid duplicate posting the same order to book
-                break
+                return # return here to avoid double posting the order to the book
         if(sellorder.quantity > 0): #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
                 self.add_order_to_book(sellorder)
                 print(f"adding sell order to book, no asks sufficient to fill it.")
@@ -169,6 +168,7 @@ class OrderBook:
                 self.buy_order(order)
             elif (order.side == 'sell'):
                 self.sell_order(order)
+        self.calculate_bid_ask()
 
 
 if __name__ == "__main__":
