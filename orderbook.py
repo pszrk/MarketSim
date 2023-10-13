@@ -1,4 +1,5 @@
 from collections import deque
+import copy
 
 class Order:
     def __init__(self, side, price, quantity):
@@ -25,18 +26,21 @@ class OrderBook:
         self.last_order = 'n/a'
         self.bid = 0
         self.ask = 0
+        self.filled_from_book = []
 
     def to_json(self):
         bids_data = {price: [order.to_dict() for order in orders] for price, orders in self.bids.items()}
         asks_data = {price: [order.to_dict() for order in orders] for price, orders in self.asks.items()}
         last_order = self.last_order
+        recent_fills = [o.to_dict() for o in self.filled_from_book]
         return {
             'price': self.price,
             'bids': bids_data,
             'asks': asks_data,
             'last_order' : last_order,
             'bid': self.bid,
-            'ask': self.ask
+            'ask': self.ask,
+            'recent_fills' : recent_fills
         }
     
     def get_status(self):
@@ -88,6 +92,7 @@ class OrderBook:
                 if front_sell_order_at_price.quantity < buyorder.quantity:
                     # this sell order is not enough to fill the entire buy order, 
                     # we do nothing more to the sell order since it is already popped from the deque,
+                    self.filled_from_book.append(front_sell_order_at_price) # just add the sell order to current list of filled asks
                     # we decrement buyorder quantity by the contracts of the sell order
                     print(f"that is not enough to fill the whole buy order")
                     buyorder.quantity -= front_sell_order_at_price.quantity
@@ -96,8 +101,13 @@ class OrderBook:
                         del self.asks[self.price]
                         print(f"deleted self.asks entry at {self.price}")
                 else: # current sell order is enough to fill the entire buy order
-                    print(f"it is enough to fill the entire buy order")       
-                    front_sell_order_at_price.quantity -= buyorder.quantity
+                    print(f"it is enough to fill the entire buy order")    
+                    if front_sell_order_at_price.quantity > buyorder.quantity:
+                        #the sell order on the book got partially filled, and we want to add the order that got partially filled to list of fills for this incoming buy order. 
+                        partialfill = copy.copy(front_sell_order_at_price)
+                        partialfill.quantity = front_sell_order_at_price.quantity - buyorder.quantity
+                        self.filled_from_book.append(partialfill)               
+                    front_sell_order_at_price.quantity -= buyorder.quantity                    
                     buyorder.quantity = 0
                     # remove buy order bid price key from dict as well, if it was added earlier due to a partial fill.
                     if buyorder.price in self.bids and not self.bids[buyorder.price]:
@@ -117,6 +127,7 @@ class OrderBook:
         if(buyorder.quantity > 0): #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
                 self.add_order_to_book(buyorder)
                 print(f"adding buy order to book, no asks sufficient to fill it.")
+        
 
     def execute_sell(self, sellorder):
         print(f"executing sell at {sellorder.price} qty {sellorder.quantity}")
@@ -130,6 +141,7 @@ class OrderBook:
                 if front_buy_order_at_price.quantity < sellorder.quantity:
                     # this buy order is not enough to fill the entire sell order, 
                     # we do nothing more to the buy order since it is already popped from the deque,
+                    self.filled_from_book.append(front_buy_order_at_price) # just add the buy order to current list of filled bids
                     # we decrement sellorder quantity by the contracts of the buy order
                     print(f"that is not enough to fill the whole sell order")
                     sellorder.quantity -= front_buy_order_at_price.quantity
@@ -138,7 +150,12 @@ class OrderBook:
                         del self.bids[self.price]
                         print(f"deleted self.bids entry at {self.price}")
                 else: # current buy order is enough to fill the entire sell order
-                    print(f"it is enough to fill the entire sell order")         
+                    print(f"it is enough to fill the entire sell order")
+                    if front_buy_order_at_price.quantity > sellorder.quantity:
+                        # the sell order on the book got partially filled, and we want to add the order that got partially filled to list of fills for this incoming sell order. 
+                        partialfill = copy.copy(front_buy_order_at_price)
+                        partialfill.quantity = front_buy_order_at_price.quantity - sellorder.quantity
+                        self.filled_from_book.append(partialfill)         
                     front_buy_order_at_price.quantity -= sellorder.quantity
                     sellorder.quantity = 0
                     # remove sell order ask price key from dict as well, if it was added earlier due to a partial fill.
@@ -159,9 +176,11 @@ class OrderBook:
         if(sellorder.quantity > 0): #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
                 self.add_order_to_book(sellorder)
                 print(f"adding sell order to book, no asks sufficient to fill it.")
+        
 
 
     def process_order_update(self, add_or_remove, order):
+        self.filled_from_book.clear()
         self.last_order = f"{order.side} {order.quantity} @ {order.price}"
         if add_or_remove == 'add':
             if(order.side == 'buy'):
