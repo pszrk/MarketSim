@@ -23,6 +23,8 @@ class OrderBook:
         self.asks = {}
         self.price = 0
         self.last_order = 'n/a'
+        self.bid = 0
+        self.ask = 0
 
     def to_json(self):
         bids_data = {price: [order.to_dict() for order in orders] for price, orders in self.bids.items()}
@@ -33,7 +35,9 @@ class OrderBook:
             'price': self.price,
             'bids': bids_data,
             'asks': asks_data,
-            'last_order' : last_order
+            'last_order' : last_order,
+            'bid': self.bid,
+            'ask': self.ask
         }
     
     def get_status(self):
@@ -48,6 +52,14 @@ class OrderBook:
             if order.price not in self.asks:
                 self.asks[order.price] = deque()
             self.asks[order.price].append(order)
+        self.calculate_bid_ask()
+
+
+    def calculate_bid_ask(self):
+        if len(self.bids) > 0:
+            self.bid = max(self.bids)
+        if len(self.asks) > 0:
+            self.ask = min(self.asks)
     
 
     def buy_order(self, order):
