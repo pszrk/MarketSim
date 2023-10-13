@@ -36,12 +36,12 @@
         socket.onmessage = function(event) {
             try{
                 const orderBookData = JSON.parse(event.data);
-                console.log(typeof orderBookData);
+                //console.log(typeof orderBookData);
                 console.log(orderBookData);
-                console.log('price should be:', orderBookData.price);
-                console.log('bids should be:', orderBookData.bids);
-                console.log('asks should be:', orderBookData.asks);
-                console.log('last should be:', orderBookData.last_order);
+                //console.log('price should be:', orderBookData.price);
+                //console.log('bids should be:', orderBookData.bids);
+                //console.log('asks should be:', orderBookData.asks);
+                //console.log('last should be:', orderBookData.last_order);
                 // display order book data
                 priceDiv.innerText = orderBookData.price;
                 lastOrderDiv.innerText = `newest order: 
@@ -51,13 +51,21 @@
                 bids = [];                
                 for(const key in orderBookData.bids){
                     if(orderBookData.bids.hasOwnProperty(key)){
-                        const nestedObj = orderBookData.bids[key];
-                        const order = {
-                            price: nestedObj[0].price,
-                            qty: nestedObj[0].quantity,
+                        const bidsAtPrice = orderBookData.bids[key];
+                        console.log('ORDEROBJ IS ', bidsAtPrice);
+                        for (let bidOrder of bidsAtPrice){
+                            console.log(`${bidOrder.quantity} @ ${bidOrder.price}`);
+                            const order = {
+                                price: bidOrder.price,
+                                qty: bidOrder.quantity,
+                            };
+                            bids.push(order);   
+                        }                        
+                        /*const order = {
+                            price: bidsAtPrice[0].price,
+                            qty: bidsAtPrice[0].quantity,
                         };
-                        //console.log("ORDER IS ", order);
-                        bids.push(order);     
+                        bids.push(order);*/   
                     }
                 }
                 bids.sort((a,b) => b.price - a.price);  
@@ -70,12 +78,19 @@
                 asks = [];                
                 for(const key in orderBookData.asks){
                     if(orderBookData.asks.hasOwnProperty(key)){
-                        const nestedObj = orderBookData.asks[key];
-                        const order = {
+                        const asksAtPrice = orderBookData.asks[key];
+                        for (let askOrder of asksAtPrice){
+                            const order = {
+                                price: askOrder.price,
+                                qty: askOrder.quantity,
+                            };
+                            asks.push(order);  
+                        }
+                        /*const order = {
                             price: nestedObj[0].price,
                             qty: nestedObj[0].quantity,
                         };
-                        asks.push(order);     
+                        asks.push(order);*/
                     }
                 }
                 asks.sort((a,b) => b.price - a.price);   
@@ -84,7 +99,7 @@
                 }               
                 asksDiv.innerText = asksStr;
 
-                console.log(`price amount is ${orderBookData.price}`)
+                //console.log(`price amount is ${orderBookData.price}`)
                 
             }
             catch(error){
