@@ -23,6 +23,12 @@ def simulate_random_order(order_book):
     return order_book.process_order_update('add', order)
 
 
+def send_custom_order(order_book, side, price, quantity):
+    order = Order(side, price, quantity)
+    print(f"sending custom order {side} {quantity} @ {price}")
+    return order_book.process_order_update('add', order)
+
+
 
 if __name__ == "__main__":
     order_book = OrderBook()
