@@ -11,7 +11,28 @@
     <div id="order-book-container">
         <div id="price"></div>
         <div id="bidask"></div>
-        <div id="last"></div>
+        <div id="newest-order-container">
+            <div id="last"></div>
+            <div id="newest-fills"></div>
+        </div>
+        <div id="send-order-container">
+            <form id="orderForm">
+                <label for="price">Price:</label>
+                <input type="number" id="submitprice" name="price" step="0.01" min="1" required>
+            
+                <label for="amount">Amount:</label>
+                <input type="number" id="submitamount" name="amount" step="1" min="1" required>
+            
+                <label for="side">Side:</label>
+                <select id="submitside" name="side" required>
+                    <option value="buy">Buy</option>
+                    <option value="sell">Sell</option>
+                </select>
+            
+                <button type="button" onclick="submitOrder()">Submit Order</button>
+                <button type="button" onclick="submitRandomOrder()">Random Order</button>
+            </form>
+        </div>
         <div id="labels">BID&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
             &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspASK</div>
         <div id="asks-grid-container">
@@ -25,6 +46,7 @@
     <script>
         const priceDiv = document.getElementById('price');
         const lastOrderDiv = document.getElementById('last');
+        const newFillsDiv = document.getElementById('newest-fills');
         const bidsDiv = document.getElementById('bids-data');
         const asksDiv = document.getElementById('asks-data');
         const bidaskDiv = document.getElementById('bidask');
@@ -43,6 +65,12 @@
                 bidaskDiv.innerHTML = `Bid ${orderBookData.bid}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ask ${orderBookData.ask}`
                 lastOrderDiv.innerText = `newest order: 
                     ${orderBookData.last_order}`
+
+                newFillsStr = '';
+                for(let f of orderBookData.recent_fills){
+                    newFillsStr += `filled ${f.side} ${f.quantity} @ ${f.price}; `
+                }
+                newFillsDiv.innerText = newFillsStr;
 
                 bidsStr = '';
                 bids = [];                
@@ -109,6 +137,32 @@
         socket.onclose = function(event) {
             console.log('WebSocket connection closed:', event);
         };
+
+
+        function submitOrder() {
+            const price = document.getElementById('submitprice').value;
+            const amount = document.getElementById('submitamount').value;
+            const side = document.getElementById('submitside').value;
+
+            console.log(`price ${price} amount ${amount} side ${side}`)
+
+            const orderData = {
+                price: price,
+                amount: amount,
+                side: side
+            }
+            
+            console.log(JSON.stringify(orderData));
+            socket.send(JSON.stringify(orderData));
+        }
+
+        function submitRandomOrder() {            
+            const orderMsg = {random: '1231'}
+            socket.send(JSON.stringify(orderMsg));
+        }
+
     </script>
+
+
 </body>
 </html>
