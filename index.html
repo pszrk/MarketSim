@@ -10,6 +10,7 @@
     <h1>Order Book</h1>
     <div id="order-book-container">
         <div id="price"></div>
+        <div id="bidask"></div>
         <div id="last"></div>
         <div id="labels">BID&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
             &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspASK</div>
@@ -26,6 +27,7 @@
         const lastOrderDiv = document.getElementById('last');
         const bidsDiv = document.getElementById('bids-data');
         const asksDiv = document.getElementById('asks-data');
+        const bidaskDiv = document.getElementById('bidask');
 
         const socket = new WebSocket('ws://localhost:5000');
 
@@ -36,14 +38,9 @@
         socket.onmessage = function(event) {
             try{
                 const orderBookData = JSON.parse(event.data);
-                //console.log(typeof orderBookData);
                 console.log(orderBookData);
-                //console.log('price should be:', orderBookData.price);
-                //console.log('bids should be:', orderBookData.bids);
-                //console.log('asks should be:', orderBookData.asks);
-                //console.log('last should be:', orderBookData.last_order);
-                // display order book data
                 priceDiv.innerText = orderBookData.price;
+                bidaskDiv.innerHTML = `Bid ${orderBookData.bid}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ask ${orderBookData.ask}`
                 lastOrderDiv.innerText = `newest order: 
                     ${orderBookData.last_order}`
 
