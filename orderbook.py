@@ -1,4 +1,3 @@
-import json
 from collections import deque
 
 class Order:
@@ -25,12 +24,12 @@ class OrderBook:
         #self.bids = {}  # dictionary with key: price, value: [list of Order objects]
         #self.asks = {}
         self.price = 0
-        self.last_order = None
+        self.last_order = 'n/a'
 
     def to_json(self):
         bids_data = {price: [order.to_dict() for order in orders] for price, orders in self.bids.items()}
         asks_data = {price: [order.to_dict() for order in orders] for price, orders in self.asks.items()}
-        last_order = self.last_order.to_dict() if self.last_order else 'n/a'
+        last_order = self.last_order
 
         return {
             'price': self.price,
@@ -88,96 +87,67 @@ class OrderBook:
                     print(f"it is enough to fill the entire buy order")       
                     front_sell_order_at_price.quantity -= buyorder.quantity
                     buyorder.quantity = 0
+                    # remove buy order bid price key from dict as well, if it was added earlier due to a partial fill.
+                    if buyorder.price in self.bids and not self.bids[buyorder.price]:
+                        del self.bids[buyorder.price]
+                        print(f"removed buyorder bid key {buyorder.price} from dict")
                     print(f"remaining sell order qty {front_sell_order_at_price.quantity}")
                     if front_sell_order_at_price.quantity > 0: #this particular sell order still has contracts remaining unfilled, so add it back to the front of the deque of sell orders at its price
                         sell_orders_at_price.appendleft(front_sell_order_at_price)
                         print(f"appending remaing sell order back to the orders at this price.")
+                    elif not self.asks[self.price]:
+                        del self.asks[self.price]
+                        print(f"sell order fully filled and no remaining asks at {self.price}, removing price from dict")
             else: #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
                 self.add_order_to_book(buyorder)
                 print(f"adding buy order to book, no asks sufficient to fill it.")
                 break
-        else: #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
+        if(buyorder.quantity > 0): #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
                 self.add_order_to_book(buyorder)
                 print(f"adding buy order to book, no asks sufficient to fill it.")
 
     def execute_sell(self, sellorder):
+        print(f"executing sell at {sellorder.price} qty {sellorder.quantity}")
         while(sellorder.quantity > 0 and self.bids):
             if(max(self.bids) >= sellorder.price): # highest bid is above or equal to the sell order price
                 self.price = max(self.bids) # self.bids item is a dict with key price, value deque of Order objects
+                print(f"self.price is {self.price}")
                 buy_orders_at_price = self.bids[self.price] # reference deque of all buy orders at this price
                 front_buy_order_at_price = buy_orders_at_price.popleft() # get the first/oldest buy order at this price
+                print(f"first buy order at price {front_buy_order_at_price.price} qty {front_buy_order_at_price.quantity}")
                 if front_buy_order_at_price.quantity < sellorder.quantity:
                     # this buy order is not enough to fill the entire sell order, 
                     # we do nothing more to the buy order since it is already popped from the deque,
                     # we decrement sellorder quantity by the contracts of the buy order
+                    print(f"that is not enough to fill the whole sell order")
                     sellorder.quantity -= front_buy_order_at_price.quantity
+                    print(f"sellorder qty is now {sellorder.quantity}")
                     if not self.bids[self.price]:  # also remove the price entry from dict if its deque of orders is empty
                         del self.bids[self.price]
-                else: # current buy order is enough to fill the entire sell order       
+                        print(f"deleted self.bids entry at {self.price}")
+                else: # current buy order is enough to fill the entire sell order
+                    print(f"it is enough to fill the entire sell order")         
                     front_buy_order_at_price.quantity -= sellorder.quantity
-                    sellorder.quantity == 0
+                    sellorder.quantity = 0
+                    # remove sell order ask price key from dict as well, if it was added earlier due to a partial fill.
+                    if sellorder.price in self.asks and not self.asks[sellorder.price]:
+                        del self.asks[sellorder.price]
+                        print(f"removed sellorder ask key {sellorder.price} from dict")
+                    print(f"remaining buy order qty {front_buy_order_at_price.quantity}")
                     if front_buy_order_at_price.quantity > 0: #this particular buy order still has contracts remaining unfilled, so add it back to the front of the deque of buy orders at its price
                         buy_orders_at_price.appendleft(front_buy_order_at_price)
+                        print(f"appending remaing buy order back to the orders at this price.")
             else: #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
                 self.add_order_to_book(sellorder)
+                print(f"adding sell order to book, no asks sufficient to fill it.")
                 break
-        else: #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
+        if(sellorder.quantity > 0): #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
                 self.add_order_to_book(sellorder)
-    
-    # def add_order(self, order):
-    #     self.last_order = order
-    #     if order.side == 'buy':
-    #         if order.price in self.bids:
-    #             self.bids[order.price].append(order)
-    #         else:
-    #             self.bids[order.price] = [order]
-    #     elif order.side == 'sell':
-    #         if order.price in self.asks:
-    #             self.asks[order.price].append(order)
-    #         else:
-    #             self.asks[order.price] = [order]
-    #     self.match_orders()
-    
-    # def match_orders(self):
-    #     for buy_price in sorted(self.bids.keys(), reverse=True):
-    #         for sell_price in sorted(self.asks.keys()):
-    #             if buy_price >= sell_price:
-    #                 print(f"trying to match buy{buy_price} to sell{sell_price}")
-    #                 matched_quantity = min(
-    #                     sum(o.quantity for o in self.bids[buy_price]),
-    #                     sum(o.quantity for o in self.asks[sell_price])
-    #                 )
-    #                 print(f" matched {matched_quantity}")
-    #                 self.price = sell_price
-    #                 self.execute_orders(self.bids[buy_price], matched_quantity)
-    #                 self.execute_orders(self.asks[sell_price], matched_quantity)
-    #                 print(self.get_status()) # this doesnt work 
-    #                 if not self.bids[buy_price]:
-    #                     print (f"removing bids key at {buy_price}")
-    #                     del self.bids[buy_price]
-    #                     if not self.asks[sell_price]:
-    #                         print (f"also removing asks key at {sell_price}")
-    #                         del self.asks[sell_price]
-    #                     break
-    #                 if not self.asks[sell_price]:
-    #                     print (f"removing asks key at {sell_price}")
-    #                     del self.asks[sell_price]
-    #                     break
-    
-    # def execute_orders(self, orders, quantity):
-    #     remaining_quantity = quantity
-    #     while remaining_quantity > 0 and orders:
-    #         order = orders.pop(0)
-    #         if order.quantity <= remaining_quantity:
-    #             remaining_quantity -= order.quantity
-    #         else:
-    #             order.quantity -= remaining_quantity
-    #             remaining_quantity = 0
-    #             orders.insert(0, order)
+                print(f"adding sell order to book, no asks sufficient to fill it.")
 
 
     def process_order_update(self, add_or_remove, order):
-        self.last_order = order
+        self.last_order = f"{order.side} {order.quantity} @ {order.price}"
         if add_or_remove == 'add':
             if(order.side == 'buy'):
                 self.buy_order(order)
@@ -186,24 +156,9 @@ class OrderBook:
         return self
 
 
-    
-    
-
-def print_book(book):
-    print("-------- Order Book: ------")
-    for ask in book.asks:
-        out = f"Sell Orders: {ask} "
-        for o in book.asks[ask]:
-            out += str(o)
-        print(out)
-    for bid in book.bids:
-        out = f"Buy Orders: {bid} "
-        for o in book.bids[bid]:
-            out += str(o)
-        print(out)
-    print("---------------------------")
-
-order_book = OrderBook()
-
-
-print_book(order_book)
+if __name__ == "__main__":
+    order_book = OrderBook()
+    print("running orderbook.py as main")
+    order_book.process_order_update('add', Order('buy', 46.45, 3))
+    order_book.process_order_update('add', Order('buy', 48.45, 9))
+    order_book.process_order_update('add', Order('sell', 45.71, 3))
