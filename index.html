@@ -44,9 +44,8 @@
                 console.log('last should be:', orderBookData.last_order);
                 // display order book data
                 priceDiv.innerText = orderBookData.price;
-                lastOrderDiv.innerText = 
-                    `newest order: 
-                    ${orderBookData.last_order.side}  ${orderBookData.last_order.price}    ${orderBookData.last_order.quantity}`
+                lastOrderDiv.innerText = `newest order: 
+                    ${orderBookData.last_order}`
 
                 bidsStr = '';
                 bids = [];                
