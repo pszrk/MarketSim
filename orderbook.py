@@ -21,8 +21,6 @@ class OrderBook:
     def __init__(self):
         self.bids = {} #dictionary with key:price, value:[deque of Order objects]
         self.asks = {}
-        #self.bids = {}  # dictionary with key: price, value: [list of Order objects]
-        #self.asks = {}
         self.price = 0
         self.last_order = 'n/a'
 
@@ -153,7 +151,6 @@ class OrderBook:
                 self.buy_order(order)
             elif (order.side == 'sell'):
                 self.sell_order(order)
-        return self
 
 
 if __name__ == "__main__":
