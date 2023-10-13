@@ -17,11 +17,10 @@ def simulate_order_flow(order_book, num_orders, delay):
         time.sleep(delay)
 
 
-def simulate_random_order(order_book, num_orders):
-    for _ in range(num_orders):
-        order = generate_random_order()
-        print(f"Sending Order: {order.side} {order.quantity} @ {order.price}")
-        return order_book.process_order_update('add', order)
+def simulate_random_order(order_book):
+    order = generate_random_order()
+    print(f"Sending Order: {order.side} {order.quantity} @ {order.price}")
+    return order_book.process_order_update('add', order)
 
 
 
