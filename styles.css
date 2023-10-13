@@ -13,13 +13,64 @@ body{
 }
 
 #last{
+    padding-bottom: 5px;
+}
+
+#newest-fills{
     padding-bottom: 20px;
 }
 
 #labels{
+    padding-top: 30px;
     padding-bottom: 10px;
 }
 
 #asks-grid-container{
     padding-left: 75px;
+}
+
+form {
+    width: 650px;
+    border:2px solid #fdfcfc;
+    border-radius: 3px;
+    background-color: #333333;
+}
+
+input#submitprice, input#submitamount {
+    height: 30px;
+    padding: 8px;
+    box-sizing: border-box;
+    border: none;
+    font-size: 16px;
+    background-color: #333333;
+    color: azure;
+}
+
+input#submitprice {
+    width: 110px;
+}
+
+input#submitamount {
+    width: 70px;
+}
+
+button {
+    padding: 10px;
+    background-color: darkslategray;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#submitside{
+    background-color: darkslategray;
+    color:#fff
+}
+
+select {
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none; 
 }
