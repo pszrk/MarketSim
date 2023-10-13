@@ -58,8 +58,12 @@ class OrderBook:
     def calculate_bid_ask(self):
         if len(self.bids) > 0:
             self.bid = max(self.bids)
+        else:
+            self.bid = 0
         if len(self.asks) > 0:
             self.ask = min(self.asks)
+        else:
+            self.ask = 0
     
 
     def buy_order(self, order):
@@ -111,6 +115,7 @@ class OrderBook:
             else: #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
                 self.add_order_to_book(buyorder)
                 print(f"adding buy order to book, no asks sufficient to fill it.")
+                buyorder.quantity = 0 # this is needed to avoid duplicate posting the same order to book
                 break
         if(buyorder.quantity > 0): #lowest ask is not less or equal to the buy price, so add the buy order to list of bids and return.
                 self.add_order_to_book(buyorder)
@@ -150,6 +155,7 @@ class OrderBook:
             else: #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
                 self.add_order_to_book(sellorder)
                 print(f"adding sell order to book, no asks sufficient to fill it.")
+                sellorder.quantity = 0 # this is needed to avoid duplicate posting the same order to book
                 break
         if(sellorder.quantity > 0): #highest bid is not above or equal to the sell price, so add the sell order to list of asks and return.
                 self.add_order_to_book(sellorder)
