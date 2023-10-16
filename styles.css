@@ -74,3 +74,45 @@ select {
     -webkit-appearance: none;
     -moz-appearance: none; 
 }
+
+#bidask-table-container{
+    display: flex;
+    flex-direction: column;
+    width:600px;
+}
+
+#askTable{
+    margin-left: 300px;
+}
+
+#bidTable{
+    width: 300px;
+}
+
+#askTable th:first-child,
+    #askTable td:first-child {
+        /* first column in askTable */
+        width: 100px;
+        text-align: left;
+    }
+
+    #askTable th:nth-child(2),
+    #askTable td:nth-child(2) {
+        /* second column in askTable */
+        width: 100px;
+        text-align: left;        
+    }
+
+    #bidTable th:first-child,
+    #bidTable td:first-child {
+        /* first column in bidTable */
+        width: 100px;
+        text-align: right;
+    }
+
+    #bidTable th:nth-child(2),
+    #bidTable td:nth-child(2) {
+        /* second column in bidTable */
+        width: 100px;
+        text-align: right;
+    }

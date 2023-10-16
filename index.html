@@ -8,13 +8,17 @@
 </head>
 <body>
     <h1>Order Book</h1>
-    <div id="order-book-container">
-        <div id="price"></div>
-        <div id="bidask"></div>
-        <div id="newest-order-container">
-            <div id="last"></div>
-            <div id="newest-fills"></div>
+    <div id="main-container">
+
+        <div id="heading-container">
+            <div id="price"></div>
+            <div id="bidask"></div>
+            <div id="newest-order-container">
+                <div id="last"></div>
+                <div id="newest-fills"></div>
+            </div>
         </div>
+        
         <div id="send-order-container">
             <form id="orderForm">
                 <label for="price">Price:</label>
@@ -27,20 +31,35 @@
                 <select id="submitside" name="side" required>
                     <option value="buy">Buy</option>
                     <option value="sell">Sell</option>
-                </select>
-            
+                </select>            
                 <button type="button" onclick="submitOrder()">Submit Order</button>
                 <button type="button" onclick="submitRandomOrder()">Random Order</button>
             </form>
         </div>
-        <div id="labels">BID&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspASK</div>
-        <div id="asks-grid-container">
-            <div id="asks-data"></div>
+
+        <div id="bidask-table-container">
+            <table id="askTable">
+                <thead>
+                    <tr>
+                        <!--<th>Ask Price</th>
+                        <th>Qty</th> -->
+                    </tr>
+                </thead>
+                <tbody id="askTableBody"></tbody>
+            </table>
+    
+            <table id="bidTable">
+                <thead>
+                    <tr>
+                        <!--<th>Qty</th>
+                        <th>Bid Price</th> -->
+                    </tr>
+                </thead>
+                <tbody id="bidTableBody"></tbody>
+            </table>
         </div>
-        <div id="bids-grid-container">
-            <div id="bids-data"></div>
-        </div>        
+        
+               
     </div>
 
     <script>
@@ -72,7 +91,6 @@
                 }
                 newFillsDiv.innerText = newFillsStr;
 
-                bidsStr = '';
                 bids = [];                
                 for(const key in orderBookData.bids){
                     if(orderBookData.bids.hasOwnProperty(key)){
@@ -85,21 +103,17 @@
                                 qty: bidOrder.quantity,
                             };
                             bids.push(order);   
-                        }                        
-                        /*const order = {
-                            price: bidsAtPrice[0].price,
-                            qty: bidsAtPrice[0].quantity,
-                        };
-                        bids.push(order);*/   
+                        } 
                     }
                 }
-                bids.sort((a,b) => b.price - a.price);  
+                bids.sort((a,b) => b.price - a.price); 
+                bidTableBody.innerHTML = ''; 
                 for(bid of bids){
-                    bidsStr += `${bid.qty}.............${bid.price} \n` 
-                }               
-                bidsDiv.innerText = bidsStr;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${bid.qty}</td><td>${bid.price}</td>`;
+                    bidTableBody.appendChild(row);
+                }
 
-                asksStr = '';
                 asks = [];                
                 for(const key in orderBookData.asks){
                     if(orderBookData.asks.hasOwnProperty(key)){
@@ -111,20 +125,15 @@
                             };
                             asks.push(order);  
                         }
-                        /*const order = {
-                            price: nestedObj[0].price,
-                            qty: nestedObj[0].quantity,
-                        };
-                        asks.push(order);*/
                     }
                 }
-                asks.sort((a,b) => b.price - a.price);   
+                asks.sort((a,b) => b.price - a.price);  
+                askTableBody.innerHTML = '';  
                 for(ask of asks){
-                    asksStr += `${ask.price}.............${ask.qty}\n` 
-                }               
-                asksDiv.innerText = asksStr;
-
-                //console.log(`price amount is ${orderBookData.price}`)
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${ask.price}</td><td>${ask.qty}</td>`;
+                    askTableBody.appendChild(row);
+                }
                 
             }
             catch(error){
