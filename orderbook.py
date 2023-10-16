@@ -102,7 +102,7 @@ class OrderBook:
                         print(f"deleted self.asks entry at {self.price}")
                 else: # current sell order is enough to fill the entire buy order
                     print(f"it is enough to fill the entire buy order")    
-                    if front_sell_order_at_price.quantity > buyorder.quantity:
+                    if front_sell_order_at_price.quantity >= buyorder.quantity:
                         #the sell order on the book got partially filled, and we want to add the order that got partially filled to list of fills for this incoming buy order. 
                         partialfill = copy.copy(front_sell_order_at_price)
                         partialfill.quantity = buyorder.quantity
@@ -151,7 +151,7 @@ class OrderBook:
                         print(f"deleted self.bids entry at {self.price}")
                 else: # current buy order is enough to fill the entire sell order
                     print(f"it is enough to fill the entire sell order")
-                    if front_buy_order_at_price.quantity > sellorder.quantity:
+                    if front_buy_order_at_price.quantity >= sellorder.quantity:
                         # the sell order on the book got partially filled, and we want to add the order that got partially filled to list of fills for this incoming sell order. 
                         partialfill = copy.copy(front_buy_order_at_price)
                         partialfill.quantity = sellorder.quantity
