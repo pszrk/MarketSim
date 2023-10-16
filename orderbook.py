@@ -105,7 +105,7 @@ class OrderBook:
                     if front_sell_order_at_price.quantity > buyorder.quantity:
                         #the sell order on the book got partially filled, and we want to add the order that got partially filled to list of fills for this incoming buy order. 
                         partialfill = copy.copy(front_sell_order_at_price)
-                        partialfill.quantity = front_sell_order_at_price.quantity - buyorder.quantity
+                        partialfill.quantity = buyorder.quantity
                         self.filled_from_book.append(partialfill)               
                     front_sell_order_at_price.quantity -= buyorder.quantity                    
                     buyorder.quantity = 0
@@ -154,7 +154,7 @@ class OrderBook:
                     if front_buy_order_at_price.quantity > sellorder.quantity:
                         # the sell order on the book got partially filled, and we want to add the order that got partially filled to list of fills for this incoming sell order. 
                         partialfill = copy.copy(front_buy_order_at_price)
-                        partialfill.quantity = front_buy_order_at_price.quantity - sellorder.quantity
+                        partialfill.quantity = sellorder.quantity
                         self.filled_from_book.append(partialfill)         
                     front_buy_order_at_price.quantity -= sellorder.quantity
                     sellorder.quantity = 0
