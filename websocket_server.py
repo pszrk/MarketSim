@@ -54,7 +54,7 @@ class WebSocketServer:
             data = json.loads(message)
             # check if dictionary
             if isinstance(data, dict):
-                if all(key in data for key in ['price', 'amount', 'side']):
+                if all(key in data and data[key] for key in ['price', 'amount', 'side']):
                     print("received message to submit custom order")
                     await self.submit_custom_order(
                         data['side'], int(data['price']), int(data['amount'])
@@ -75,6 +75,16 @@ class WebSocketServer:
 
 
     async def submit_custom_order(self, side, price, quantity):
+        try:
+            if side not in {'buy', 'sell'} or \
+                not int(quantity) or \
+                not float(price):
+                        print("incorrect data format in submit_custom_order, order discarded.") 
+                        return
+        except Exception as e:
+            print("data format exception handled in submit_custom_order, order discarded.") 
+            return
+        
         send_custom_order(self.order_book, side, price, quantity)
         order_book_status = self.order_book.get_status()
         await self.send_order_book_update(order_book_status)
