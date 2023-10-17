@@ -181,7 +181,7 @@ class OrderBook:
 
     def process_order_update(self, add_or_remove, order):
         self.filled_from_book.clear()
-        self.last_order = f"{order.side} {order.quantity} @ {order.price}"
+        self.last_order = f"{order.side} {order.quantity} @ {order.price:.2f}"
         if add_or_remove == 'add':
             if(order.side == 'buy'):
                 self.buy_order(order)
