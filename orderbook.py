@@ -180,6 +180,13 @@ class OrderBook:
 
 
     def process_order_update(self, add_or_remove, order):
+        try:
+            if order.side not in {'buy', 'sell'}: return
+            if not int (order.quantity): return
+            if not float(order.price): return
+        except Exception as e:
+            return
+
         self.filled_from_book.clear()
         self.last_order = f"{order.side} {order.quantity} @ {order.price:.2f}"
         if add_or_remove == 'add':
