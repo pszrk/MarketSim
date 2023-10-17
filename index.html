@@ -83,6 +83,10 @@
 
     <script>
         const priceDiv = document.getElementById('price');
+        priceDiv.addEventListener('animationend', () => {
+            console.log('removing fade in')
+            priceDiv.classList.remove('fade-in');
+        });
         //const lastOrderDiv = document.getElementById('last');
         //const newFillsDiv = document.getElementById('newest-fills');
         const bidsDiv = document.getElementById('bids-data');
@@ -99,7 +103,13 @@
             try{
                 const orderBookData = JSON.parse(event.data);
                 console.log(orderBookData);
-                priceDiv.innerText = orderBookData.price.toFixed(2);
+                const px = orderBookData.price.toFixed(2);
+                if (priceDiv.innerText != px){
+                    priceDiv.classList.add('fade-in');
+                    priceDiv.innerText = orderBookData.price.toFixed(2);
+                    console.log('adding fade in')                    
+                }
+
                 bidaskDiv.innerHTML = `${orderBookData.bid.toFixed(2)} / ${orderBookData.ask.toFixed(2)}`
                                
                 //lastOrderDiv.innerText = `newest order: 
@@ -140,7 +150,7 @@
                 for(bid of bids){
                     const row = document.createElement('tr');
                     row.innerHTML = `<td>${bid.qty}</td><td>${bid.price.toFixed(2)}</td>`;
-                    bidTableBody.appendChild(row);                    
+                    bidTableBody.appendChild(row);                  
                 }
 
                 asks = [];                
