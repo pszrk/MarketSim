@@ -4,20 +4,29 @@ body{
     font-family: sans-serif;
 }
 
+#heading-container{
+    display: flex;
+    flex-direction: column;
+}
+
 #price{
-    padding-bottom: 30px;
+    padding-bottom: 20px;
+    font-size: 30px;
 }
 
 #bidask{
+    font-size: 16px;
     padding-bottom: 20px;
 }
 
 #last{
     padding-bottom: 5px;
+    font-size: 12px;
 }
 
 #newest-fills{
     padding-bottom: 20px;
+    font-size: 12px;
 }
 
 #labels{
@@ -76,6 +85,7 @@ select {
 }
 
 #bidask-table-container{
+    flex: 0 0 600px;
     display: flex;
     flex-direction: column;
     width:600px;
@@ -116,3 +126,39 @@ select {
         width: 100px;
         text-align: right;
     }
+
+    #bidask-labels-container {
+        display: flex;
+    }
+
+    #bid-label, #ask-label {
+        display: inline-block;
+        width: 300px;
+        text-align: center;
+        font-size: 20px;
+    }
+
+    #bid-label{
+        border-right: 2px solid;
+        border-color: #fdfcfc
+    }
+
+
+    #bottom-portion{
+        display: flex;
+    }
+
+    #tsContainer{        
+        flex:1;
+        max-height: 400px;
+        max-width: 200px;
+        overflow-y: auto; /* Enable vertical scrollbar if needed */
+    }
+
+    @media (min-width: 800px) {
+        #tsContainer {
+            padding-left: 200px;
+        }
+    }
+
+
