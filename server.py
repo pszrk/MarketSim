@@ -1,7 +1,3 @@
-import asyncio
-import json
-import websockets
-from websockets.exceptions import ConnectionClosedError
 from orderbook import OrderBook
 from simulate_orders import simulate_random_order, send_custom_order
 
