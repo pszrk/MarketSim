@@ -39,7 +39,7 @@ body{
 }
 
 form {
-    width: 650px;
+    width: 800px;
     border:2px solid #fdfcfc;
     border-radius: 3px;
     background-color: #333333;
@@ -154,6 +154,16 @@ select {
     max-width: 200px;
     overflow-y: auto; /* Enable vertical scrollbar if needed */
 }
+
+#submitbutton{
+    margin-left: 20px;
+}
+
+#randombutton{
+    margin-left: 40px;
+    background-color: rgb(0, 90, 180);
+}
+
 
 @media (min-width: 800px) {
     #tsContainer {
