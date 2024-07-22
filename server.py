@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
-from orderbook import order_book, Order
+from orderbook import OrderBook, Order
 
 app = Flask(__name__)
+book = OrderBook()
 
 #  endpoint to submit orders
 @app.route("/submit/", methods =["POST"])
@@ -27,8 +28,7 @@ def receive_order():
             return jsonify({"error": "Quantity must be a positive number"}), 400    
         
         order = Order(side, price, qty)
-        order_book.add_order(order)
-        order_book.match_orders()
+        book.process_server_order(order)
 
         return jsonify({"message": "Order received successfully"}), 200
 
@@ -39,8 +39,8 @@ def receive_order():
     
 @app.route("/orderbook/", methods =["GET"])
 def get_orderbook():
-    order_book_state = {
-        "bids": order_book.bids,
-        "asks": order_book.asks
-    }
+    order_book_state = OrderBook.get_orderbook_state()
     return jsonify(order_book_state), 200
+
+if __name__ == "__main__":
+    app.run(debug=True)  # Set debug=True during development to enable debug mode
