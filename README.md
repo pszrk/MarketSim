@@ -20,16 +20,18 @@ alternatively, you can make direct HTTP requests to the API endpoints.
 to submit a simulated order, you can send POST requests to the url  
 
 with a JSON payload containing: price(float), qty(int), and side("bid" or "ask"):   
-{  
+```{  
     "price": 100,  
     "qty": 10,  
     "side": "ask"  
-}  
+}```  
   
 to get the orderbook, send a GET request to the url    
 
-  
-  
+<br>
+<br>
+<br>
+<br>
   
   
 [![License: CC BY-NC-ND 4.0](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
