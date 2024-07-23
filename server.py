@@ -1,7 +1,13 @@
 from flask import Flask, request, jsonify
 from orderbook import OrderBook, Order
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={
+    r"/orderbook/": {"origins": "*", "methods": ["GET"]},
+    r"/submit/": {"origins": "*", "methods": ["POST"]},
+})
+
 book = OrderBook()
 
 #  endpoint to submit orders
