@@ -22,19 +22,19 @@
             
             <div id="send-order-container">
                 <form id="orderForm">
-                    <label for="price">Price:</label>
+                    <label for="price">Limit Price:</label>
                     <input type="number" id="submitprice" name="price" step="0.01" min="1" required>
                 
-                    <label for="amount">Amount:</label>
+                    <label for="amount">Quantity:</label>
                     <input type="number" id="submitamount" name="amount" step="1" min="1" required>
                 
                     <label for="side">Side:</label>
                     <select id="submitside" name="side" required>
-                        <option value="buy">Buy</option>
-                        <option value="sell">Sell</option>
+                        <option value="bid">Buy</option>
+                        <option value="ask">Sell</option>
                     </select>            
-                    <button type="button" id="submitbutton" onclick="submitOrder()">Submit Custom Order</button>
-                    <button type="button" id="randombutton" onclick="submitRandomOrder()">Send Random Order</button>
+                    <button type="button" id="submitbutton" onclick="submitOrder()">Submit Order</button>
+                    <button type="button" id="updatebutton" onclick="getOrderBook()">Refresh OrderBook</button>
                 </form>
             </div>
         </div>
@@ -43,25 +43,18 @@
         <div id="bottom-portion">
             <div id="bidask-table-container">
                 <div id="bidask-labels-container">
-                    <div id="bid-label">BID</div>
-                    <div id="ask-label">ASK</div>
+                    <div id="bid-label">Buy</div>
+                    <div id="price-label">Price</div>
+                    <div id="ask-label">Sell</div>
                 </div>            
                 <table id="askTable">
                     <thead>
-                        <tr>
-                            <!--<th>Ask Price</th>
-                            <th>Qty</th> -->
-                        </tr>
                     </thead>
                     <tbody id="askTableBody"></tbody>
                 </table>
         
                 <table id="bidTable">
                     <thead>
-                        <tr>
-                            <!--<th>Qty</th>
-                            <th>Bid Price</th> -->
-                        </tr>
                     </thead>
                     <tbody id="bidTableBody"></tbody>
                 </table>
@@ -83,26 +76,19 @@
     </div>
 
     <script>
+        window.onload = function() { getOrderBook();};
+
         const priceDiv = document.getElementById('price');
         priceDiv.addEventListener('animationend', () => {
-            console.log('removing fade in')
             priceDiv.classList.remove('fade-in');
         });
-        //const lastOrderDiv = document.getElementById('last');
-        //const newFillsDiv = document.getElementById('newest-fills');
         const bidsDiv = document.getElementById('bids-data');
         const asksDiv = document.getElementById('asks-data');        
         const bidaskDiv = document.getElementById('bidask');
         const bidDiv = document.getElementById('bid-price');
         const askDiv = document.getElementById('ask-price');
 
-        const socket = new WebSocket('ws://localhost:5000');
-
-        socket.onopen = function(event) {
-            console.log('WebSocket connection opened:', event);
-        };
-
-        socket.onmessage = function(event) {
+        /*socket.onmessage = function(event) {
             try{
                 const orderBookData = JSON.parse(event.data);
                 console.log(orderBookData);
@@ -181,14 +167,55 @@
             }
             catch(error){
                 console.error('Error parsing JSON:', error);
-            }
+            }            
+        };*/
 
-            
-        };
+        function updateOrderBookUI(bookdata){
+            let bids = [];
+            for(const bidOrder of bookdata.bids){
+                    const order = {
+                        price: bidOrder.price,
+                        qty: bidOrder.quantity,
+                    };
+                    bids.push(order);
+                }
+                bids.sort((a,b) => b.price - a.price); 
+                bidTableBody.innerHTML = ''; 
+                for(bid of bids){
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${bid.qty}</td><td>${bid.price.toFixed(2)}</td>`;
+                    bidTableBody.appendChild(row);                  
+                }
 
-        socket.onclose = function(event) {
-            console.log('WebSocket connection closed:', event);
-        };
+                let asks = [];                
+                for(const askOrder of bookdata.asks){
+                    const order = {
+                        price: askOrder.price,
+                        qty: askOrder.quantity,
+                    };
+                    asks.push(order);
+                }
+                asks.sort((a,b) => b.price - a.price);  
+                askTableBody.innerHTML = '';  
+                for(ask of asks){
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${ask.price.toFixed(2)}</td><td>${ask.qty}</td>`;
+                    askTableBody.appendChild(row);
+                }
+        }
+
+        function getOrderBook(){
+            fetch('http://localhost:5000/orderbook/')
+            .then(response => {
+                if (!response.ok) {throw new Error('server response was not ok');}
+                return response.json();
+            })
+            .then(data => {
+                // update ui with order book data
+                updateOrderBookUI(data);
+            })
+            .catch(error => {console.error('Error fetching order book:', error);});
+        }
 
 
         function submitOrder() {
@@ -196,21 +223,35 @@
             const amount = document.getElementById('submitamount').value;
             const side = document.getElementById('submitside').value;
 
-            console.log(`price ${price} amount ${amount} side ${side}`)
-
             const orderData = {
                 price: price,
-                amount: amount,
+                qty: amount,
                 side: side
-            }
-            
-            console.log(JSON.stringify(orderData));
-            socket.send(JSON.stringify(orderData));
+            }            
+            fetch('http://localhost:5000/submit/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData),
+            })
+            .then(response => {
+                if (!response.ok) {throw new Error('server response was not ok when submitting order');} 
+                return response.json();
+            })
+            .then(data => {
+                getOrderBook();
+            })
+            .catch(error => {console.error('Error submitting order:', error);                
+            });
         }
 
-        function submitRandomOrder() {            
-            const orderMsg = {random: '1231'}
-            socket.send(JSON.stringify(orderMsg));
+        function submitRandomOrder() {
+            const orderData = {
+                price: 100,
+                qty: 10,
+                side: "ask"
+            }
         }
 
     </script>
