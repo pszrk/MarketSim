@@ -39,8 +39,8 @@ def receive_order():
     
 @app.route("/orderbook/", methods =["GET"])
 def get_orderbook():
-    order_book_state = OrderBook.get_orderbook_state()
+    order_book_state = book.get_orderbook_state()
     return jsonify(order_book_state), 200
 
-if __name__ == "__main__":
-    app.run(debug=True)  # Set debug=True during development to enable debug mode
+#if __name__ == "__main__":
+#    app.run(debug=True)
