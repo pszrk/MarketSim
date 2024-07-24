@@ -8,15 +8,18 @@ The Python backend connects to a MySQL server to store and manage the current st
 Python - backend development  
 Flask - Web framework for building the API endpoints  
 SQLAlchemy - ORM for interacting with the database  
-MySQL: database  
+MySQL: database used to store orderbook data  
+HTML/JavaScript/CSS: demo frontend webpage to interact with the API via a graphical interface
 
 <b>usage instructions:</b>   
 the exchange server is hosted on the cloud.  
 there is a webpage for viewing the exchange and submitting orders, accessible at  
+https://pszrk.pythonanywhere.com/  
 
 alternatively, you can make direct HTTP requests to the API endpoints.  
-to submit a simulated order, you can send POST requests to the url  
-
+to submit a simulated order, you can send POST requests to the endpoint  
+/submit/  
+currently hosted at https://pszrk.pythonanywhere.com/submit/    
 with a JSON payload containing: price(float), qty(int), and side("bid" or "ask"):   
 ```
 {  
@@ -26,7 +29,9 @@ with a JSON payload containing: price(float), qty(int), and side("bid" or "ask")
 }
 ```  
   
-to get the orderbook, send a GET request to the url    
+to get the orderbook, send a GET request to the endpoint  
+/orderbook/   
+currently hosted at https://pszrk.pythonanywhere.com/orderbook/  
 
 <br>
 <br>
