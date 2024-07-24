@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from orderbook import OrderBook, Order
 from flask_cors import CORS
 
@@ -47,6 +47,12 @@ def receive_order():
 def get_orderbook():
     order_book_state = book.get_orderbook_state()
     return jsonify(order_book_state), 200
+
+
+@app.route("/")
+def index():
+    return render_template('index.html')
+
 
 #if __name__ == "__main__":
 #    app.run(debug=True)
