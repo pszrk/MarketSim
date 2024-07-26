@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from orderbook import OrderBook, Order
+from orderbook import OrderBook, Order, Trade
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -48,11 +48,25 @@ def get_orderbook():
     order_book_state = book.get_orderbook_state()
     return jsonify(order_book_state), 200
 
+@app.route("/trades/", methods =["GET"])
+def get_trades():
+    trades = book.get_trades()
+    trades_json = []
+    for trade in trades:
+        trade_json = {
+            'id': trade.id,
+            'price': float(trade.price),  # Ensure price is serialized as float
+            'quantity': trade.quantity,
+            'time': trade.time.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
+        }
+        trades_json.append(trade_json)
+    return jsonify(trades_json), 200
+
 
 @app.route("/")
 def index():
     return render_template('index.html')
 
 
-#if __name__ == "__main__":
-#    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
