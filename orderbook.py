@@ -108,6 +108,16 @@ class OrderBook:
         finally:
             session.close()
 
+    def get_trades(self):
+        try:
+            session = Session()
+            trades = session.query(Trade).all()
+            session.close()
+            return trades
+        except Exception as e:
+            print(f"Failed to retrieve trades: {e}")
+        finally:
+            session.close()
 
     def display_orderbook(self):
         print("BIDS:")
