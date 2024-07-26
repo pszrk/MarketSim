@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, Float
+from sqlalchemy import create_engine, Column, Integer, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 import os
 from dotenv import load_dotenv
 
@@ -35,15 +36,25 @@ class Ask(Base):
     price = Column(Float)
     quantity = Column(Integer)
 
+class Trade(Base):
+    __tablename__ = 'trades'
+    id = Column(Integer, primary_key=True)
+    price = Column(Float)
+    quantity = Column(Integer)
+    time = Column(DateTime)
+
 #  create tables in the database if they do not exist
 Base.metadata.create_all(engine)
 
 class OrderBook:
     def __init__(self):
         self.bids = {}  #  empty dictionary
-        self.asks = {} 
+        self.asks = {}
+        self.newest_order = None
 
     def add_order(self, order):
+        self.newest_order = order
+
         if(order.side == 'bid'):
             if(order.price) in self.bids:
                 self.bids[order.price] += order.quantity
@@ -53,8 +64,8 @@ class OrderBook:
             if order.price in self.asks:
                 self.asks[order.price] += order.quantity
             else:
-                self.asks[order.price] = order.quantity
-    
+                self.asks[order.price] = order.quantity    
+
     def match_orders(self):
         while self.bids and self.asks:
             best_bid_price = max(self.bids)     #  highest key in self.bids dictionary
@@ -67,6 +78,11 @@ class OrderBook:
                 
                 matched_quantity = min(best_bid_order_qty, best_ask_order_qty)
                 #print(f"Matched {matched_quantity} @ {best_ask_price}")
+
+                #  record the trade in time&sales, filling limit orders using the newest order
+                if self.newest_order:
+                    trade_price = best_ask_price if self.newest_order.side == 'bid' else best_bid_price
+                    self.record_trade(trade_price, matched_quantity, datetime.now())
                         
                 self.bids[best_bid_price] -= matched_quantity    # adjust the value associated with best_bid_price key
                 self.asks[best_ask_price] -= matched_quantity    # adjust the value associated with best_ask_price key
@@ -78,6 +94,30 @@ class OrderBook:
 
             else:  #  best bid price is not above or equal best ask price
                 break
+
+    def record_trade(self, price, qty, time):
+        #  record a trade in time&sales table
+        session = Session()
+        try:
+            new_trade = Trade(price=price, quantity=qty, time=time)
+            session.add(new_trade)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            print(f"Failed to record trade: {e}")
+        finally:
+            session.close()
+
+    def get_trades(self):
+        try:
+            session = Session()
+            trades = session.query(Trade).all()
+            session.close()
+            return trades
+        except Exception as e:
+            print(f"Failed to retrieve trades: {e}")
+        finally:
+            session.close()
 
     def display_orderbook(self):
         print("BIDS:")
