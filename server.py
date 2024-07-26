@@ -55,9 +55,9 @@ def get_trades():
     for trade in trades:
         trade_json = {
             'id': trade.id,
-            'price': float(trade.price),  # Ensure price is serialized as float
+            'price': float(trade.price),  
             'quantity': trade.quantity,
-            'time': trade.time.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
+            'time': trade.time.strftime('%Y-%m-%d %H:%M:%S')
         }
         trades_json.append(trade_json)
     return jsonify(trades_json), 200
