@@ -6,6 +6,7 @@ app = Flask(__name__)
 CORS(app, resources={
     r"/orderbook/": {"origins": "*", "methods": ["GET"]},
     r"/submit/": {"origins": "*", "methods": ["POST"]},
+    r"/trades/": {"origins": "*", "methods": ["POST"]},
 })
 
 book = OrderBook()
