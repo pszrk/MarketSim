@@ -6,6 +6,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>MarketSim</title>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- add React from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" src="/static/react.js"></script>
 </head>
 <body>
     <div id="main-container">
