@@ -1,17 +1,7 @@
 
-window.onload = function() { getOrderBook(); getTrades()};
+window.onload = function() { getOrderBook();};
 
-newestTradeId = 0;
 
-const priceDiv = document.getElementById('price');
-/*priceDiv.addEventListener('animationend', () => {
-    priceDiv.classList.remove('fade-in');
-});*/
-const bidsDiv = document.getElementById('bids-data');
-const asksDiv = document.getElementById('asks-data');        
-const bidaskDiv = document.getElementById('bidask');
-const bidDiv = document.getElementById('bid-price');
-const askDiv = document.getElementById('ask-price');
 
 function updateOrderBookUI(bookdata){
     let bids = [];
@@ -56,39 +46,12 @@ function getOrderBook(){
     .then(data => {
         // update ui with order book data
         updateOrderBookUI(data);
+        //dispatch event that order book was refreshed
+        const event = new CustomEvent('bookUpdated');
+        window.dispatchEvent(event);
     })
     .catch(error => {console.error('Error fetching order book:', error);});
 }
-
-function getTrades(){
-    fetch('https://pszrk.pythonanywhere.com/trades/')
-    .then(response => {
-        if (!response.ok) {throw new Error('server response getting trades trades was not ok');}
-        return response.json();
-    })
-    .then(data => {
-        // update ui with trades data
-        updateTradesUI(data);
-    })
-    .catch(error => {console.error('Error fetching order book:', error);});
-}
-
-function updateTradesUI(data){
-    const tradesTable = document.getElementById('tsTable');
-    const tbody = tradesTable.querySelector('tbody');
-
-    data.forEach(trade => {
-        if(trade.id > newestTradeId){
-            newestTradeId = trade.id;
-            const row = tbody.insertRow(0);
-            const c1 = row.insertCell(0);
-            const c2 = row.insertCell(1);
-            c1.textContent = `${trade.quantity} @ ${trade.price}`;
-            c2.textContent = `${trade.time}`;
-        }
-    });
-}
-
 
 function submitOrder() {
     const price = document.getElementById('submitprice').value;
@@ -113,7 +76,6 @@ function submitOrder() {
     })
     .then(data => {
         getOrderBook();
-        getTrades();
     })
     .catch(error => {console.error('Error submitting order:', error);                
     });
